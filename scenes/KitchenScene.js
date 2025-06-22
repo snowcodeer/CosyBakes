@@ -180,20 +180,10 @@ class KitchenScene extends Phaser.Scene {
                 strokeThickness: 2
             }).setOrigin(0.5).setVisible(false);
 
-            // Add description label
-            const descLabel = this.add.text(item.x, item.y + item.height/2 + 20, item.description, {
-                fontFamily: 'VT323',
-                fontSize: '14px',
-                fill: '#DEB887',
-                stroke: '#8B4513',
-                strokeThickness: 1
-            }).setOrigin(0.5).setVisible(false);
-
             // Hover effects
             hotspot.on('pointerover', () => {
                 visual.setVisible(true);
                 label.setVisible(true);
-                descLabel.setVisible(true);
                 
                 // Add subtle glow animation
                 this.tweens.add({
@@ -205,7 +195,7 @@ class KitchenScene extends Phaser.Scene {
 
                 // Scale up labels slightly
                 this.tweens.add({
-                    targets: [label, descLabel],
+                    targets: [label],
                     scaleX: 1.1,
                     scaleY: 1.1,
                     duration: 200,
@@ -216,7 +206,6 @@ class KitchenScene extends Phaser.Scene {
             hotspot.on('pointerout', () => {
                 visual.setVisible(false);
                 label.setVisible(false);
-                descLabel.setVisible(false);
             });
 
             hotspot.on('pointerdown', () => {

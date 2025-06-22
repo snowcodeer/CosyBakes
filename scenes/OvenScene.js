@@ -3,6 +3,9 @@ class OvenScene extends Phaser.Scene {
         super({ key: 'OvenScene' });
     }
 
+    // Toggle flag to alternate success/fail
+    static lastOutcomeWasSuccess = false;
+
     preload() {
         this.load.image('oven-open', 'assets/equipment/oven-open.png');
         this.load.image('brownies-raw', 'assets/bakes/brownies-raw.png');
@@ -100,41 +103,47 @@ class OvenScene extends Phaser.Scene {
         });
     }
 
-    showBakedBrownies() {
-    // Show baked brownies (twice the original size)
-    const finished = this.add.image(450, 300, 'brownies-decorated')
-        .setOrigin(0.5)
-        .setScale(0.1)
-        .setAlpha(0)
-        .setDepth(2);
+        showBakedBrownies() {
+        // Alternate outcome
+        const isSuccess = !OvenScene.lastOutcomeWasSuccess;
+        OvenScene.lastOutcomeWasSuccess = isSuccess;
 
-    this.tweens.add({
-        targets: finished,
-        scale: 0.36, // double the old 0.18
-        alpha: 1,
-        duration: 800,
-        ease: 'Back.easeOut'
-    });
+        const textureKey = isSuccess ? 'brownies-decorated' : 'brownies-fail';
+        const message = isSuccess ? 'Success!' : 'Try Again!';
+        const color = isSuccess ? '#FFD700' : '#FF4C4C';
 
-    // Show success text (big and bold)
-    const successText = this.add.text(450, 500, 'Success!', {
-        fontFamily: 'VT323',
-        fontSize: '64px', // doubled
-        fill: '#FFD700',
-        stroke: '#8B4513',
-        strokeThickness: 4
-    }).setOrigin(0.5).setAlpha(0).setDepth(3);
+        const resultImage = this.add.image(450, 300, textureKey)
+            .setOrigin(0.5)
+            .setScale(0.1)
+            .setAlpha(0)
+            .setDepth(2);
 
-    this.tweens.add({
-        targets: successText,
-        alpha: 1,
-        delay: 300,
-        duration: 500
-    });
+        this.tweens.add({
+            targets: resultImage,
+            scale: 0.36,
+            alpha: 1,
+            duration: 800,
+            ease: 'Back.easeOut'
+        });
 
-    // Animate sparkles/confetti
-    this.createCelebrationParticles();
-}
+        const resultText = this.add.text(450, 500, message, {
+            fontFamily: 'VT323',
+            fontSize: '64px',
+            fill: color,
+            stroke: '#8B4513',
+            strokeThickness: 4
+        }).setOrigin(0.5).setAlpha(0).setDepth(3);
+
+        this.tweens.add({
+            targets: resultText,
+            alpha: 1,
+            delay: 300,
+            duration: 500
+        });
+
+
+    }
+
 
 
 }
