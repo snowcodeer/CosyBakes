@@ -25,6 +25,8 @@ class CountertopScene extends Phaser.Scene {
         this.bowlNotepadText = null;
         this.notepadContainer = null;
         this.hintButton = null;
+        this.currentMessageText = null;
+        this.currentMessageTween = null;
 
 
         
@@ -625,13 +627,19 @@ class CountertopScene extends Phaser.Scene {
 
         console.log('Placing bowl on scale');
         
-        // Create bowl sprite on the scale at normal inventory size (90px)
-        const bowlOnScale = this.add.image(450, 350, 'bowl');
-        bowlOnScale.setDisplaySize(90, 90); // Normal inventory size, not carried size
-        bowlOnScale.setDepth(10); // Above scale
-        
-        this.bowlOnScale = bowlOnScale;
-        this.bowlContents = []; // Reset bowl contents when placing new bowl
+        this.bowlOnScale = this.add.image(450, 350, 'bowl').setInteractive({ useHandCursor: true });
+        this.bowlOnScale.setDisplaySize(90, 90);
+        this.bowlOnScale.setDepth(10);
+
+        this.bowlOnScale.on('pointerdown', () => {
+            if (!this.carriedSprite) {
+                this.removeBowlFromScale();
+            } else {
+                this.showIngredientMessage("Can't remove bowl while holding an item!");
+            }
+        });
+
+
         
         // Add bowl weight to scale
         this.addToScale('bowl');
@@ -762,28 +770,44 @@ class CountertopScene extends Phaser.Scene {
     }
 
     showIngredientMessage(message) {
-    this.lastMessage = message; // Track the latest message
+        this.lastMessage = message; // Track the latest message
 
-    const messageText = this.add.text(450, 420, message, {
-        fontFamily: 'VT323',
-        fontSize: '16px',
-        fill: '#90EE90',
-        stroke: '#006400',
-        strokeThickness: 1
-    }).setOrigin(0.5);
-
-    this.tweens.add({
-        targets: messageText,
-        alpha: 0,
-        y: 380,
-        duration: 2000,
-        ease: 'Power2',
-        onComplete: () => {
-            messageText.destroy();
-            this.lastMessage = ''; // Reset after fading out
+        // Clear any existing message and tween
+        if (this.currentMessageText) {
+            if (this.currentMessageTween) {
+                this.currentMessageTween.destroy();
+                this.currentMessageTween = null;
+            }
+            this.currentMessageText.destroy();
+            this.currentMessageText = null;
         }
-    });
-}
+
+        // Create new message
+        this.currentMessageText = this.add.text(450, 420, message, {
+            fontFamily: 'VT323',
+            fontSize: '16px',
+            fill: '#90EE90',
+            stroke: '#006400',
+            strokeThickness: 1
+        }).setOrigin(0.5);
+
+        // Create new tween
+        this.currentMessageTween = this.tweens.add({
+            targets: this.currentMessageText,
+            alpha: 0,
+            y: 380,
+            duration: 2000,
+            ease: 'Power2',
+            onComplete: () => {
+                if (this.currentMessageText) {
+                    this.currentMessageText.destroy();
+                    this.currentMessageText = null;
+                }
+                this.currentMessageTween = null;
+                this.lastMessage = ''; // Reset after fading out
+            }
+        });
+    }
 
 
     addEquipmentVisuals() {
@@ -896,17 +920,28 @@ class CountertopScene extends Phaser.Scene {
                 scale.clearTint();
             });
 
+            // In the addScaleVisuals() method, replace this section:
+
             scale.on('pointerdown', () => {
                 if (this.carriedSprite && this.carriedIngredient === 'bowl') {
                     // Place bowl on scale
                     if (this.bowlOnScale) {
                         this.showIngredientMessage('Scale already has a bowl!');
                     } else {
-                        this.bowlOnScale = this.add.image(450, 230, 'bowl');
+                        this.bowlOnScale = this.add.image(450, 230, 'bowl').setInteractive({ useHandCursor: true });
                         this.bowlOnScale.setDisplaySize(240, 200);
                         this.bowlOnScale.setDepth(10);
                         this.bowlContents = []; // Reset bowl contents
                         this.addToScale('bowl');
+
+                        // FIXED: Add the proper check here
+                        this.bowlOnScale.on('pointerdown', () => {
+                            if (!this.carriedSprite) {
+                                this.removeBowlFromScale();
+                            } else {
+                                this.showIngredientMessage("Can't remove bowl while holding an item!");
+                            }
+                        });
 
                         this.carriedSprite.destroy();
                         this.resetCarriedState();
@@ -1005,5 +1040,36 @@ class CountertopScene extends Phaser.Scene {
 
     this.bowlNotepadText.setText(lines.join('\n'));
 }
+removeBowlFromScale() {
+    if (!this.bowlOnScale) return;
+
+    this.bowlOnScale.destroy();
+    this.bowlOnScale = null;
+
+    // Remove bowl weight and entry from scale items
+    this.scaleWeight -= 250;
+    this.scaleItems = this.scaleItems.filter(item => item.ingredient !== 'bowl');
+    this.bowlContents = [];
+
+    this.updateScaleDisplay();
+    this.showIngredientMessage('Returned bowl to inventory.');
+
+    // Add bowl back to inventory (surgically, not full reset)
+    this.addBowlBackToInventory();
+}
+
+addBowlBackToInventory() {
+    const itemSize = 90;
+    const x = 350 + (this.ingredientList.indexOf('bowl') * 100); // same spacing as in populateInventory
+    const y = 530;
+
+    const bowlSprite = this.add.image(x, y, 'bowl');
+    bowlSprite.setDisplaySize(itemSize, itemSize);
+    this.setupIngredientInteractions(bowlSprite, 'bowl', x, y);
+
+    this.inventoryContainer.add(bowlSprite);
+    this.originalIngredientPositions.set(bowlSprite, { x, y });
+}
+
 
 }
