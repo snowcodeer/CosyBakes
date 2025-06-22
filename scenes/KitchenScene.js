@@ -1,3 +1,7 @@
+/**
+ * Kitchen Scene - Updated Original Version
+ * Main hub where players can select different equipment to use
+ */
 class KitchenScene extends Phaser.Scene {
     constructor() {
         super({ key: 'KitchenScene' });
@@ -29,7 +33,7 @@ class KitchenScene extends Phaser.Scene {
         // Fade in from the transition
         this.cameras.main.fadeIn(500, 139, 69, 19);
 
-        // Check if kitchen texture exists and add fallback
+        // Check if kitchen texture exists
         if (this.textures.exists('kitchen')) {
             console.log('Kitchen texture found, displaying...');
             
@@ -45,10 +49,11 @@ class KitchenScene extends Phaser.Scene {
             
             console.log(`Kitchen scaled to: ${scale}, original size: ${kitchen.width}x${kitchen.height}`);
         } else {
-            console.warn('Kitchen texture not found, creating fallback...');
+            console.warn('Kitchen texture not found - please add kitchen.png to assets/scenes/');
             
-            // Create a fallback kitchen background
-            this.createFallbackKitchen();
+            // Simple background without placeholder
+            const bg = this.add.rectangle(450, 300, 900, 600, 0x8B4513);
+            bg.setStrokeStyle(5, 0x654321);
         }
 
         // Back button
@@ -73,12 +78,17 @@ class KitchenScene extends Phaser.Scene {
         backButton.on('pointerdown', () => {
             this.cameras.main.fadeOut(300, 139, 69, 19);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('RecipeSelectionScene');
+                // Check if RecipeSelectionScene exists, otherwise stay in kitchen
+                if (this.scene.manager.getScene('RecipeSelectionScene')) {
+                    this.scene.start('RecipeSelectionScene');
+                } else {
+                    console.log('RecipeSelectionScene not found - staying in kitchen');
+                }
             });
         });
 
-        // Placeholder instruction text
-        const instruction = this.add.text(450, 580, 'Click around to explore the kitchen!', {
+        // Instruction text
+        const instruction = this.add.text(450, 580, 'Click on equipment to start baking!', {
             fontFamily: 'VT323',
             fontSize: '24px',
             fill: '#DEB887',
@@ -102,51 +112,54 @@ class KitchenScene extends Phaser.Scene {
         console.log('Kitchen scene loaded! Ready to add baking mechanics.');
     }
 
-    createFallbackKitchen() {
-        // Create a simple fallback kitchen scene
-        const bg = this.add.graphics();
-        bg.fillGradientStyle(0xDEB887, 0xDEB887, 0xF5DEB3, 0xF5DEB3);
-        bg.fillRect(0, 0, 900, 600);
-
-        // Add some basic kitchen elements as placeholders
-        const counter = this.add.graphics();
-        counter.fillStyle(0x8B4513);
-        counter.fillRect(0, 400, 900, 200);
-
-        const wall = this.add.graphics();
-        wall.fillStyle(0xF5DEB3);
-        wall.fillRect(0, 0, 900, 400);
-
-        // Add text indicating this is a fallback
-        this.add.text(450, 200, 'KITCHEN PLACEHOLDER', {
-            fontFamily: 'VT323',
-            fontSize: '20px',
-            fill: '#8B4513',
-            stroke: '#F5DEB3',
-            strokeThickness: 2
-        }).setOrigin(0.5);
-
-        this.add.text(450, 250, 'kitchen.png not found', {
-            fontFamily: 'VT323',
-            fontSize: '14px',
-            fill: '#A0522D'
-        }).setOrigin(0.5);
-
-        this.add.text(450, 280, 'Check: assets/scenes/kitchen.png', {
-            fontFamily: 'VT323',
-            fontSize: '12px',
-            fill: '#654321'
-        }).setOrigin(0.5);
-    }
-
     createEquipmentHotspots() {
         // Define equipment locations based on the actual kitchen.png layout
         const equipment = [
-            { name: 'scale', x: 270, y: 310, width: 80, height: 80 },      // Left counter, bowl-shaped scale
-            { name: 'stove', x: 430, y: 350, width: 200, height: 30 },     // Center, top of cream appliance (burners)
-            { name: 'oven', x: 430, y: 470, width: 230, height: 190 },      // Center, bottom of cream appliance (oven door)
-            { name: 'microwave', x: 630, y: 310, width: 130, height: 100 },  // Right side, brown microwave
-            { name: 'mixer', x: 800, y: 310, width: 130, height: 120 }       // Far right, stand mixer
+            { 
+                name: 'scale', 
+                scene: 'ScaleScene',
+                x: 270, 
+                y: 310, 
+                width: 80, 
+                height: 80,
+                description: 'Weigh ingredients precisely'
+            },
+            { 
+                name: 'stove', 
+                scene: 'StoveScene', // Future scene
+                x: 430, 
+                y: 350, 
+                width: 200, 
+                height: 30,
+                description: 'Cook on the stovetop'
+            },
+            { 
+                name: 'oven', 
+                scene: 'OvenScene', // Future scene
+                x: 430, 
+                y: 470, 
+                width: 230, 
+                height: 190,
+                description: 'Bake in the oven'
+            },
+            { 
+                name: 'microwave', 
+                scene: 'MicrowaveScene',
+                x: 630, 
+                y: 310, 
+                width: 130, 
+                height: 100,
+                description: 'Heat and warm ingredients'
+            },
+            { 
+                name: 'mixer', 
+                scene: 'MixerScene',
+                x: 800, 
+                y: 310, 
+                width: 130, 
+                height: 120,
+                description: 'Mix ingredients together'
+            }
         ];
 
         equipment.forEach(item => {
@@ -164,6 +177,15 @@ class KitchenScene extends Phaser.Scene {
                 fontSize: '20px',
                 fill: '#F5DEB3',
                 stroke: '#8B4513',
+                strokeThickness: 2
+            }).setOrigin(0.5).setVisible(false);
+
+            // Add description label
+            const descLabel = this.add.text(item.x, item.y + item.height/2 + 20, item.description, {
+                fontFamily: 'VT323',
+                fontSize: '14px',
+                fill: '#DEB887',
+                stroke: '#8B4513',
                 strokeThickness: 1
             }).setOrigin(0.5).setVisible(false);
 
@@ -171,6 +193,7 @@ class KitchenScene extends Phaser.Scene {
             hotspot.on('pointerover', () => {
                 visual.setVisible(true);
                 label.setVisible(true);
+                descLabel.setVisible(true);
                 
                 // Add subtle glow animation
                 this.tweens.add({
@@ -179,11 +202,21 @@ class KitchenScene extends Phaser.Scene {
                     duration: 300,
                     ease: 'Power2'
                 });
+
+                // Scale up labels slightly
+                this.tweens.add({
+                    targets: [label, descLabel],
+                    scaleX: 1.1,
+                    scaleY: 1.1,
+                    duration: 200,
+                    ease: 'Power2'
+                });
             });
 
             hotspot.on('pointerout', () => {
                 visual.setVisible(false);
                 label.setVisible(false);
+                descLabel.setVisible(false);
             });
 
             hotspot.on('pointerdown', () => {
@@ -197,20 +230,73 @@ class KitchenScene extends Phaser.Scene {
                     ease: 'Power2'
                 });
 
-                // Transition to countertop scene
+                // Transition to specific equipment scene
                 this.time.delayedCall(200, () => {
-                    this.transitionToCountertop(item.name);
+                    this.transitionToEquipment(item.name, item.scene);
                 });
             });
         });
     }
 
-    transitionToCountertop(equipmentName) {
-        console.log(`Clicked on ${equipmentName}, transitioning to countertop...`);
+    transitionToEquipment(equipmentName, sceneKey) {
+        console.log(`Clicked on ${equipmentName}, transitioning to ${sceneKey}...`);
         
-        this.cameras.main.fadeOut(500, 139, 69, 19);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.start('CountertopScene', { selectedEquipment: equipmentName });
-        });
+        // Check if the target scene exists
+        if (this.scene.manager.getScene(sceneKey)) {
+            this.cameras.main.fadeOut(500, 139, 69, 19);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start(sceneKey);
+            });
+        } else {
+            // Scene doesn't exist yet - show message
+            console.warn(`${sceneKey} not implemented yet`);
+            
+            // Show temporary message
+            const message = this.add.text(450, 300, `${equipmentName.toUpperCase()} COMING SOON!`, {
+                fontFamily: 'VT323',
+                fontSize: '32px',
+                fill: '#FFD700',
+                stroke: '#8B4513',
+                strokeThickness: 2,
+                backgroundColor: '#000000',
+                padding: { x: 20, y: 10 }
+            }).setOrigin(0.5);
+
+            // Animate message
+            message.setAlpha(0);
+            this.tweens.add({
+                targets: message,
+                alpha: 1,
+                scaleX: 1.2,
+                scaleY: 1.2,
+                duration: 300,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    // Auto-hide after 2 seconds
+                    this.time.delayedCall(2000, () => {
+                        this.tweens.add({
+                            targets: message,
+                            alpha: 0,
+                            duration: 500,
+                            onComplete: () => {
+                                message.destroy();
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    }
+
+    // Optional: Method to return from equipment scenes
+    returnFromEquipment() {
+        this.cameras.main.fadeIn(500, 139, 69, 19);
+        console.log('Returned to kitchen from equipment');
+    }
+
+    // Optional: Method to track equipment usage statistics
+    trackEquipmentUsage(equipmentName) {
+        // Could store usage statistics here for future features
+        console.log(`${equipmentName} was used`);
     }
 }

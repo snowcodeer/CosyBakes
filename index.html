@@ -29,12 +29,19 @@
 <body>
     <div id="game-container"></div>
 
-    <!-- Load scene files -->
+    <!-- Load Base Scene Class FIRST (Required for equipment scenes) -->
+    <script src="scenes/BaseCountertopScene.js"></script>
+
+    <!-- Load Main Game Scenes -->
     <script src="scenes/RecipeSelectionScene.js"></script>
     <script src="scenes/KitchenScene.js"></script>
-    <script src="scenes/CountertopScene.js"></script>
 
-    <!-- Load main game configuration -->
+    <!-- Load Individual Equipment Scenes -->
+    <script src="scenes/ScaleScene.js"></script>
+    <script src="scenes/MicrowaveScene.js"></script>
+    <script src="scenes/MixerScene.js"></script>
+
+    <!-- Load main game configuration LAST -->
     <script src="main.js"></script>
 </body>
 </html>

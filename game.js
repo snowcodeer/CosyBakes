@@ -1,6 +1,6 @@
 /**
  * Main Game Configuration and Initialization
- * Updated to work with RecipeSelectionScene as starting scene
+ * This file must be loaded LAST after all scene files
  */
 
 // Game configuration
@@ -9,16 +9,15 @@ const gameConfig = {
     width: 900,
     height: 600,
     backgroundColor: '#8B4513',
-    parent: 'game-container', // Attach to your styled container
+    parent: document.body, // Attach to body element
     
-    // Scene configuration - RecipeSelectionScene starts first
+    // Scene configuration - order matters for scene switching
     scene: [
-        RecipeSelectionScene,    // Starting scene
-        KitchenScene,            // Kitchen hub
-        ScaleScene,              // Scale equipment scene
-        MicrowaveScene,          // Microwave equipment scene  
-        MixerScene              // Mixer equipment scene
-        // Add more equipment scenes here as needed (StoveScene, OvenScene, etc.)
+        KitchenScene,      // Main hub scene
+        ScaleScene,        // Scale equipment scene
+        MicrowaveScene,    // Microwave equipment scene  
+        MixerScene         // Mixer equipment scene
+        // Add more equipment scenes here as needed
     ],
     
     // Physics configuration (if needed for future features)
@@ -67,20 +66,37 @@ let game;
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initializing Cosy Bakes Game...');
+    console.log('Initializing Baking Game...');
+    
+    // Verify all scene classes are loaded
+    const requiredScenes = [
+        'BaseCountertopScene',
+        'KitchenScene', 
+        'ScaleScene',
+        'MicrowaveScene',
+        'MixerScene'
+    ];
+    
+    const missingScenes = requiredScenes.filter(sceneName => {
+        return typeof window[sceneName] === 'undefined';
+    });
+    
+    if (missingScenes.length > 0) {
+        console.error('Missing scene classes:', missingScenes);
+        console.error('Make sure all scene files are loaded before game.js');
+        return;
+    }
     
     // Initialize the game
     try {
         game = new Phaser.Game(gameConfig);
-        console.log('Cosy Bakes Game initialized successfully!');
-        console.log('Starting with RecipeSelectionScene...');
+        console.log('Baking Game initialized successfully!');
         
         // Optional: Add global game event listeners
         setupGlobalGameEvents();
         
     } catch (error) {
         console.error('Failed to initialize game:', error);
-        console.log('Check that all scene files are loaded properly');
     }
 });
 
@@ -151,29 +167,17 @@ function switchToScene(sceneKey) {
     }
 }
 
-// Function to go back to recipe selection
-function goToRecipeSelection() {
-    switchToScene('RecipeSelectionScene');
-}
-
-// Function to go to kitchen
-function goToKitchen() {
-    switchToScene('KitchenScene');
-}
-
 // Debug functions (remove in production)
 if (typeof window !== 'undefined') {
     // Make debug functions available globally
-    window.CosyBakes = {
+    window.BakingGame = {
         restart: restartGame,
         getCurrentScene: getCurrentScene,
         switchToScene: switchToScene,
-        goToRecipeSelection: goToRecipeSelection,
-        goToKitchen: goToKitchen,
         game: () => game
     };
     
-    console.log('Debug functions available via window.CosyBakes');
+    console.log('Debug functions available via window.BakingGame');
 }
 
 // Export for potential module use
@@ -182,8 +186,6 @@ if (typeof module !== 'undefined' && module.exports) {
         gameConfig,
         restartGame,
         getCurrentScene,
-        switchToScene,
-        goToRecipeSelection,
-        goToKitchen
+        switchToScene
     };
 }
