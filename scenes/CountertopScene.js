@@ -378,35 +378,33 @@ class CountertopScene extends Phaser.Scene {
     }
 
     pickupIngredient(ingredient, sprite) {
-        if (this.carriedSprite) {
-            return; // Already carrying something
-        }
+    if (this.carriedSprite) return; // Already carrying something
 
-        console.log(`Picking up ingredient: ${ingredient}`);
-        
-        this.carriedIngredient = ingredient;
-        this.carriedSprite = sprite;
-        
-        // Remove from inventory container and add to scene directly so it's on top
-        this.inventoryContainer.remove(sprite);
-        this.add.existing(sprite);
-        
-        // Set higher depth to appear above everything
-        sprite.setDepth(1000);
-        
-        // Add visual feedback for carried state
-        sprite.setTint(0xFFFF99); // Slight yellow tint
-        
-        // Set carried size (slightly larger than inventory size)
-        const carriedSize = 100; // 10px larger than inventory size of 90
-        if (this.textures.exists(ingredient)) {
-            sprite.setDisplaySize(carriedSize, carriedSize);
-        } else {
-            sprite.setScale(1.1); // For rectangle sprites, use scale
-        }
-        
-        this.showIngredientMessage(`Picked up ${ingredient}! Left-click to interact, right-click to drop.`);
+    console.log(`Picking up ingredient: ${ingredient}`);
+    
+    this.carriedIngredient = ingredient;
+    this.carriedSprite = sprite;
+
+    this.inventoryContainer.remove(sprite);
+    this.add.existing(sprite);
+
+    // Disable interaction so it doesn’t block clicks
+    sprite.disableInteractive();
+
+    sprite.setDepth(1000); // Stay visually on top
+    sprite.setTint(0xFFFF99);
+
+    // Slightly larger size
+    const carriedSize = 100;
+    if (this.textures.exists(ingredient)) {
+        sprite.setDisplaySize(carriedSize, carriedSize);
+    } else {
+        sprite.setScale(1.1);
     }
+
+    this.showIngredientMessage(`Picked up ${ingredient}! Left-click to interact, right-click to drop.`);
+}
+
 
     resetInventory() {
         console.log('Resetting inventory');
