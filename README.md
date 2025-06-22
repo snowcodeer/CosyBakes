@@ -9,6 +9,13 @@ Think warm wooden countertops, cozy mixers, and delightful pastel ingredients �
 
 ---
 
+## ⚠️ Just a Demo!
+
+This is an early demo and currently includes just a **half-baked (pardon the pun!) brownie recipe**. 🍫  
+More recipes, features, and polish are coming soon!
+
+---
+
 ## ✨ Features
 
 - 🍞 **Drag & Drop Baking**: Pick up ingredients and equipment and interact with different kitchen stations.
