@@ -14,6 +14,8 @@ Think warm wooden countertops, cozy mixers, and delightful pastel ingredients �
 This is a demo and currently includes just a **half-baked (pardon the pun!) brownie recipe**. 🍫  
 More recipes, features, and polish are coming soon!
 
+P.S. This is the first game I've ever made (tic tac toe does not count).
+
 ---
 
 ## 🌐 Future Plans
