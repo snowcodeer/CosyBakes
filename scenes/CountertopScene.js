@@ -9,12 +9,21 @@ class CountertopScene extends Phaser.Scene {
         this.minScrollPosition = 0;
         this.scaleItems = [];
         this.scaleWeight = 0;
+        this.tareOffset = 0; // Add tare offset tracking
         this.isScrolling = false;
         this.scrollDirection = 0;
         this.carriedIngredient = null;
         this.carriedSprite = null;
         this.originalIngredientPositions = new Map();
         this.bowlOnScale = null;
+        this.bowlContents = []; // Track what's in the bowl
+        this.isAddingIngredient = false; // Track if we're currently adding ingredient
+        this.addStartTime = 0; // Track when ingredient adding started
+        this.addingInterval = null; // For continuous adding
+        this.lastMessage = '';
+        this.lastEggAddTime = 0;
+
+
         
         // Common baking ingredients - adjust these names to match your actual asset files
         this.ingredientList = [
@@ -174,6 +183,13 @@ class CountertopScene extends Phaser.Scene {
                 } else if (pointer.rightButtonDown()) {
                     this.resetInventory();
                 }
+            }
+        });
+
+        // Handle pointer up for ingredient adding
+        this.input.on('pointerup', (pointer) => {
+            if (this.isAddingIngredient) {
+                this.stopAddingIngredient();
             }
         });
 
@@ -378,32 +394,32 @@ class CountertopScene extends Phaser.Scene {
     }
 
     pickupIngredient(ingredient, sprite) {
-    if (this.carriedSprite) return; // Already carrying something
+        if (this.carriedSprite) return; // Already carrying something
 
-    console.log(`Picking up ingredient: ${ingredient}`);
-    
-    this.carriedIngredient = ingredient;
-    this.carriedSprite = sprite;
+        console.log(`Picking up ingredient: ${ingredient}`);
+        
+        this.carriedIngredient = ingredient;
+        this.carriedSprite = sprite;
 
-    this.inventoryContainer.remove(sprite);
-    this.add.existing(sprite);
+        this.inventoryContainer.remove(sprite);
+        this.add.existing(sprite);
 
-    // Disable interaction so it doesn’t block clicks
-    sprite.disableInteractive();
+        // Disable interaction so it doesn't block clicks
+        sprite.disableInteractive();
 
-    sprite.setDepth(1000); // Stay visually on top
-    
-    // Slightly larger size
-    const carriedSize = 100;
-    if (this.textures.exists(ingredient)) {
-        sprite.setDisplaySize(carriedSize, carriedSize);
-    } else {
-        sprite.setScale(1.1);
+        sprite.setDepth(1000); // Stay visually on top
+        sprite.setTint(0xFFFF99);
+
+        // Slightly larger size
+        const carriedSize = 100;
+        if (this.textures.exists(ingredient)) {
+            sprite.setDisplaySize(carriedSize, carriedSize);
+        } else {
+            sprite.setScale(1.1);
+        }
+
+        this.showIngredientMessage(`Picked up ${ingredient}! Hold left-click on bowl to add. Right-click to drop.`);
     }
-
-    this.showIngredientMessage(`Picked up ${ingredient}! Left-click to interact, right-click to drop.`);
-}
-
 
     resetInventory() {
         console.log('Resetting inventory');
@@ -426,18 +442,130 @@ class CountertopScene extends Phaser.Scene {
         this.inventoryContainer.x = this.inventoryScrollPosition;
         this.updateScrollArrows();
         
-        this.showIngredientMessage('Inventory reset!');
+        this.showIngredientMessage('Dropped item!');
     }
 
     interactWithCarriedItem(pointer) {
-        if (!this.carriedSprite || !this.carriedIngredient) {
+    if (!this.carriedSprite || !this.carriedIngredient) {
+        return;
+    }
+
+    // Check bowl on scale
+    if (this.bowlOnScale && this.selectedEquipment === 'scale') {
+        const bowlBounds = this.bowlOnScale.getBounds();
+        if (Phaser.Geom.Rectangle.Contains(bowlBounds, pointer.x, pointer.y)) {
+            this.startAddingIngredient();
+            return;
+        }
+    }
+
+    // Avoid showing fallback if a tare warning was just shown
+    if (this.lastMessage === "Can't tare while holding an item!") {
+        return;
+    }
+
+    this.showIngredientMessage(`Left-clicked with ${this.carriedIngredient} - no function yet!`);
+}
+
+
+    startAddingIngredient() {
+        if (this.isAddingIngredient || !this.carriedIngredient || this.carriedIngredient === 'bowl') {
             return;
         }
 
-        console.log(`Interacting with carried ingredient: ${this.carriedIngredient}`);
-        
-        // For all other ingredients or equipment combinations
-        // this.showIngredientMessage(`Left-clicked with ${this.carriedIngredient} - no function yet!`);
+        console.log(`Starting to add ${this.carriedIngredient} to bowl`);
+        this.isAddingIngredient = true;
+        this.addStartTime = this.time.now;
+
+        // Add initial small amount (1-3g)
+        this.addIngredientToBowl(Phaser.Math.Between(1, 3));
+
+        // Set up continuous adding while holding
+        this.addingInterval = this.time.addEvent({
+            delay: 100, // Add more every 100ms
+            callback: () => {
+                if (!this.isAddingIngredient) return;
+
+                // Handle egg with cooldown
+                if (this.carriedIngredient === 'egg') {
+                    const now = this.time.now;
+                    if (now - this.lastEggAddTime >= 1000) { // 1000ms cooldown
+                        this.addIngredientToBowl(); // No amount passed for egg
+                        this.lastEggAddTime = now;
+                    }
+                } else {
+                    // Regular ingredient logic
+                    const holdDuration = this.time.now - this.addStartTime;
+                    const baseAmount = Math.min(1 + Math.floor(holdDuration / 500), 10);
+                    const randomAmount = Phaser.Math.Between(1, baseAmount);
+                    this.addIngredientToBowl(randomAmount);
+                }
+            },
+
+            loop: true
+        });
+    }
+
+    stopAddingIngredient() {
+        if (!this.isAddingIngredient) return;
+
+        console.log(`Stopped adding ${this.carriedIngredient} to bowl`);
+        this.isAddingIngredient = false;
+
+        if (this.addingInterval) {
+            this.addingInterval.destroy();
+            this.addingInterval = null;
+        }
+
+        // Keep the carried ingredient - don't destroy or reset state
+        // The ingredient will only disappear on right-click (resetInventory)
+
+        // Display bowl contents
+        this.displayBowlContents();
+    }
+
+    addIngredientToBowl(amount) {
+        if (!this.carriedIngredient || !this.bowlOnScale) return;
+
+        if (this.carriedIngredient === 'egg') {
+            const eggWeight = Phaser.Math.Between(63, 73);
+            this.scaleWeight += eggWeight;
+            this.updateScaleDisplay();
+
+            const existingIngredient = this.bowlContents.find(item => item.ingredient === 'egg');
+            if (existingIngredient) {
+                existingIngredient.amount += 1;
+            } else {
+                this.bowlContents.push({ ingredient: 'egg', amount: 1 });
+            }
+
+            this.showIngredientMessage(`+1 egg`);
+        } else {
+            this.scaleWeight += amount;
+            this.updateScaleDisplay();
+
+            const existingIngredient = this.bowlContents.find(item => item.ingredient === this.carriedIngredient);
+            if (existingIngredient) {
+                existingIngredient.amount += amount;
+            } else {
+                this.bowlContents.push({ ingredient: this.carriedIngredient, amount: amount });
+            }
+
+            this.showIngredientMessage(`+${amount}g ${this.carriedIngredient}`);
+        }
+    }
+
+
+
+    displayBowlContents() {
+        console.log('=== BOWL CONTENTS ===');
+        let totalWeight = 0;
+        this.bowlContents.forEach(item => {
+            console.log(`${item.ingredient}: ${item.amount}g`);
+            totalWeight += item.amount;
+        });
+        console.log(`Total ingredients: ${totalWeight}g`);
+        console.log('====================');
     }
 
     placeBowlOnScale(pointer) {
@@ -454,6 +582,7 @@ class CountertopScene extends Phaser.Scene {
         bowlOnScale.setDepth(10); // Above scale
         
         this.bowlOnScale = bowlOnScale;
+        this.bowlContents = []; // Reset bowl contents when placing new bowl
         
         // Add bowl weight to scale
         this.addToScale('bowl');
@@ -570,35 +699,43 @@ class CountertopScene extends Phaser.Scene {
         this.scaleItems.push({ ingredient, weight });
 
         // Update scale display
-        if (this.scaleWeightText) {
-            this.scaleWeightText.setText(`${this.scaleWeight}g`);
-        }
+        this.updateScaleDisplay();
 
         this.showIngredientMessage(`Added ${weight}g of ${ingredient} to scale!`);
         console.log(`Scale now contains:`, this.scaleItems);
     }
 
-    showIngredientMessage(message) {
-        // Create a temporary message that fades out
-        const messageText = this.add.text(450, 420, message, {
-            fontFamily: 'VT323',
-            fontSize: '16px',
-            fill: '#90EE90',
-            stroke: '#006400',
-            strokeThickness: 1
-        }).setOrigin(0.5);
-
-        this.tweens.add({
-            targets: messageText,
-            alpha: 0,
-            y: 380,
-            duration: 2000,
-            ease: 'Power2',
-            onComplete: () => {
-                messageText.destroy();
-            }
-        });
+    updateScaleDisplay() {
+        if (this.scaleWeightText) {
+            const displayWeight = this.scaleWeight - this.tareOffset;
+            this.scaleWeightText.setText(`${displayWeight}g`);
+        }
     }
+
+    showIngredientMessage(message) {
+    this.lastMessage = message; // Track the latest message
+
+    const messageText = this.add.text(450, 420, message, {
+        fontFamily: 'VT323',
+        fontSize: '16px',
+        fill: '#90EE90',
+        stroke: '#006400',
+        strokeThickness: 1
+    }).setOrigin(0.5);
+
+    this.tweens.add({
+        targets: messageText,
+        alpha: 0,
+        y: 380,
+        duration: 2000,
+        ease: 'Power2',
+        onComplete: () => {
+            messageText.destroy();
+            this.lastMessage = ''; // Reset after fading out
+        }
+    });
+}
+
 
     addEquipmentVisuals() {
         // Add equipment-specific visual elements
@@ -719,6 +856,7 @@ class CountertopScene extends Phaser.Scene {
                         this.bowlOnScale = this.add.image(450, 230, 'bowl');
                         this.bowlOnScale.setDisplaySize(240, 200);
                         this.bowlOnScale.setDepth(10);
+                        this.bowlContents = []; // Reset bowl contents
                         this.addToScale('bowl');
 
                         this.carriedSprite.destroy();
@@ -731,24 +869,22 @@ class CountertopScene extends Phaser.Scene {
                     this.tareScale();
                 }
             });
-
-
         }
     }
 
     clearScale() {
         this.scaleWeight = 0;
         this.scaleItems = [];
+        this.tareOffset = 0; // Reset tare when clearing
         
         // Remove bowl from scale if present
         if (this.bowlOnScale) {
             this.bowlOnScale.destroy();
             this.bowlOnScale = null;
+            this.bowlContents = []; // Clear bowl contents
         }
         
-        if (this.scaleWeightText) {
-            this.scaleWeightText.setText('Weight: 0g');
-        }
+        this.updateScaleDisplay();
         
         this.showIngredientMessage('Scale cleared!');
         console.log('Scale cleared');
@@ -781,22 +917,22 @@ class CountertopScene extends Phaser.Scene {
 
     getEquipmentInstructions(equipment) {
         const instructions = {
-            'stove': 'Ready to cook on the stovetop! Pick up ingredients and left-click to use. Right-click to reset.',
-            'oven': 'Perfect for baking brownies! Pick up ingredients and left-click to use. Right-click to reset.',
-            'microwave': 'Click the microwave to open/close the door! Pick up ingredients and left-click to use. Right-click to reset.',
-            'mixer': 'Click the mixer to start mixing! Pick up ingredients and left-click to use. Right-click to reset.',
-            'scale': 'Pick up the bowl and left-click to place it on the scale! Right-click to reset inventory.'
+            'stove': 'Ready to cook on the stovetop! Right-click to reset.',
+            'oven': 'Perfect for baking brownies! Right-click to reset.',
+            'microwave': 'Click the microwave to open/close the door! Right-click to reset.',
+            'mixer': 'Click the mixer to start mixing! Right-click to reset.',
+            'scale': 'Place bowl on scale to start. Left-click to pick up items, right-click to drop. Click scale to tare.'
         };
         
         return instructions[equipment] || 'Use this equipment for baking! Pick up ingredients and left-click to use. Right-click to reset.';
     }
 
     tareScale() {
-    // Set the current weight as the tare offset
-    this.tareOffset = this.scaleWeight;
+        // Set the current weight as the tare offset
+        this.tareOffset = this.scaleWeight;
+        this.updateScaleDisplay();
 
-    this.showIngredientMessage('Scale tared!');
-    console.log(`Tare set at: ${this.tareOffset}g`);
-}
-
+        this.showIngredientMessage('Scale tared!');
+        console.log(`Tare set at: ${this.tareOffset}g, display now shows: ${this.scaleWeight - this.tareOffset}g`);
+    }
 }
