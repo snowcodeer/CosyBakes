@@ -392,8 +392,7 @@ class CountertopScene extends Phaser.Scene {
     sprite.disableInteractive();
 
     sprite.setDepth(1000); // Stay visually on top
-    sprite.setTint(0xFFFF99);
-
+    
     // Slightly larger size
     const carriedSize = 100;
     if (this.textures.exists(ingredient)) {
