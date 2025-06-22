@@ -53,7 +53,7 @@ class KitchenScene extends Phaser.Scene {
 
         // Back button
         const backButton = this.add.text(50, 50, '< BACK', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '16px',
             fill: '#F5DEB3',
             stroke: '#8B4513',
@@ -79,7 +79,7 @@ class KitchenScene extends Phaser.Scene {
 
         // Placeholder instruction text
         const instruction = this.add.text(450, 600, 'Click around to explore the kitchen!', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '14px',
             fill: '#DEB887',
             stroke: '#8B4513',
@@ -119,7 +119,7 @@ class KitchenScene extends Phaser.Scene {
 
         // Add text indicating this is a fallback
         this.add.text(450, 200, 'KITCHEN PLACEHOLDER', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '20px',
             fill: '#8B4513',
             stroke: '#F5DEB3',
@@ -127,13 +127,13 @@ class KitchenScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.add.text(450, 250, 'kitchen.png not found', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '14px',
             fill: '#A0522D'
         }).setOrigin(0.5);
 
         this.add.text(450, 280, 'Check: assets/scenes/kitchen.png', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '12px',
             fill: '#654321'
         }).setOrigin(0.5);
@@ -160,7 +160,7 @@ class KitchenScene extends Phaser.Scene {
 
             // Add equipment label
             const label = this.add.text(item.x, item.y - item.height/2 - 20, item.name.toUpperCase(), {
-                fontFamily: 'Press Start 2P',
+                fontFamily: 'VT323',
                 fontSize: '10px',
                 fill: '#F5DEB3',
                 stroke: '#8B4513',

@@ -87,7 +87,7 @@ class CountertopScene extends Phaser.Scene {
 
         // Equipment-specific title
         const equipmentTitle = this.add.text(450, 50, `${this.selectedEquipment.toUpperCase()} STATION`, {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '28px',
             fill: '#F5DEB3',
             stroke: '#8B4513',
@@ -96,7 +96,7 @@ class CountertopScene extends Phaser.Scene {
 
         // Back to kitchen button
         const backButton = this.add.text(50, 50, '< KITCHEN', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '16px',
             fill: '#F5DEB3',
             stroke: '#8B4513',
@@ -125,9 +125,9 @@ class CountertopScene extends Phaser.Scene {
 
         // Instructions based on equipment (moved up slightly to account for inventory bar)
         const instructions = this.getEquipmentInstructions(this.selectedEquipment);
-        this.add.text(450, 430, instructions, {
-            fontFamily: 'Press Start 2P',
-            fontSize: '12px',
+        this.add.text(450, 440, instructions, {
+            fontFamily: 'VT323',
+            fontSize: '20px',
             fill: '#DEB887',
             stroke: '#8B4513',
             strokeThickness: 1
@@ -135,9 +135,9 @@ class CountertopScene extends Phaser.Scene {
 
         // Add scale weight display if scale is selected
         if (this.selectedEquipment === 'scale') {
-            this.scaleWeightText = this.add.text(450, 320, '0 g', {
-                fontFamily: 'Press Start 2P',
-                fontSize: '32px',
+            this.scaleWeightText = this.add.text(450, 365, '0g', {
+                fontFamily: 'VT323',
+                fontSize: '28px',
                 fill: '#000000',
                 stroke: '#F5DEB3',
                 strokeThickness: 2
@@ -211,7 +211,7 @@ class CountertopScene extends Phaser.Scene {
 
         // Add scroll indicators - positioned for wider inventory
         this.leftArrow = this.add.text(30, 530, '<<', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '18px',
             fill: '#F5DEB3',
             stroke: '#8B4513',
@@ -219,7 +219,7 @@ class CountertopScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.rightArrow = this.add.text(870, 530, '>>', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '18px',
             fill: '#F5DEB3',
             stroke: '#8B4513',
@@ -572,7 +572,7 @@ class CountertopScene extends Phaser.Scene {
 
         // Update scale display
         if (this.scaleWeightText) {
-            this.scaleWeightText.setText(`${this.scaleWeight} g`);
+            this.scaleWeightText.setText(`${this.scaleWeight}g`);
         }
 
         this.showIngredientMessage(`Added ${weight}g of ${ingredient} to scale!`);
@@ -581,9 +581,9 @@ class CountertopScene extends Phaser.Scene {
 
     showIngredientMessage(message) {
         // Create a temporary message that fades out
-        const messageText = this.add.text(450, 400, message, {
-            fontFamily: 'Press Start 2P',
-            fontSize: '10px',
+        const messageText = this.add.text(450, 420, message, {
+            fontFamily: 'VT323',
+            fontSize: '16px',
             fill: '#90EE90',
             stroke: '#006400',
             strokeThickness: 1
@@ -705,24 +705,10 @@ class CountertopScene extends Phaser.Scene {
             // Add hover effects
             scale.on('pointerover', () => {
                 scale.setTint(0xF0F0F0);
-                this.tweens.add({
-                    targets: scale,
-                    scaleX: 0.30,
-                    scaleY: 0.25,
-                    duration: 200,
-                    ease: 'Power2'
-                });
             });
 
             scale.on('pointerout', () => {
                 scale.clearTint();
-                this.tweens.add({
-                    targets: scale,
-                    scaleX: 0.25,
-                    scaleY: 0.25,
-                    duration: 200,
-                    ease: 'Power2'
-                });
             });
 
             scale.on('pointerdown', () => {

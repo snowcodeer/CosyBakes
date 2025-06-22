@@ -66,7 +66,7 @@ class RecipeSelectionScene extends Phaser.Scene {
 
         // Title
         const title = this.add.text(450, 100, 'COSY BAKES', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '42px',
             fill: '#F5DEB3',
             stroke: '#8B4513',
@@ -75,7 +75,7 @@ class RecipeSelectionScene extends Phaser.Scene {
 
         // Subtitle
         this.add.text(450, 160, 'Choose Your Recipe', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '20px',
             fill: '#DEB887'
         }).setOrigin(0.5);
@@ -86,25 +86,25 @@ class RecipeSelectionScene extends Phaser.Scene {
 
         // Recipe card content
         const brownieTitle = this.add.text(450, 270, 'BROWNIES', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '24px',
             fill: '#8B4513'
         }).setOrigin(0.5);
 
         const brownieDesc = this.add.text(450, 310, 'Fudgy & Delicious', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '16px',
             fill: '#A0522D'
         }).setOrigin(0.5);
 
         const difficulty = this.add.text(450, 350, 'Difficulty: Easy', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '14px',
             fill: '#654321'
         }).setOrigin(0.5);
 
         const timeText = this.add.text(450, 380, 'Time: 45 minutes', {
-            fontFamily: 'Press Start 2P',
+            fontFamily: 'VT323',
             fontSize: '14px',
             fill: '#654321'
         }).setOrigin(0.5);
