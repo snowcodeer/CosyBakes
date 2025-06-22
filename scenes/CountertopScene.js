@@ -135,12 +135,12 @@ class CountertopScene extends Phaser.Scene {
 
         // Add scale weight display if scale is selected
         if (this.selectedEquipment === 'scale') {
-            this.scaleWeightText = this.add.text(450, 450, 'Weight: 0g', {
+            this.scaleWeightText = this.add.text(450, 320, '0 g', {
                 fontFamily: 'Press Start 2P',
-                fontSize: '14px',
-                fill: '#F5DEB3',
-                stroke: '#8B4513',
-                strokeThickness: 1
+                fontSize: '32px',
+                fill: '#000000',
+                stroke: '#F5DEB3',
+                strokeThickness: 2
             }).setOrigin(0.5);
         }
 
@@ -438,7 +438,7 @@ class CountertopScene extends Phaser.Scene {
         console.log(`Interacting with carried ingredient: ${this.carriedIngredient}`);
         
         // For all other ingredients or equipment combinations
-        this.showIngredientMessage(`Left-clicked with ${this.carriedIngredient} - no function yet!`);
+        // this.showIngredientMessage(`Left-clicked with ${this.carriedIngredient} - no function yet!`);
     }
 
     placeBowlOnScale(pointer) {
@@ -572,7 +572,7 @@ class CountertopScene extends Phaser.Scene {
 
         // Update scale display
         if (this.scaleWeightText) {
-            this.scaleWeightText.setText(`Weight: ${this.scaleWeight}g`);
+            this.scaleWeightText.setText(`${this.scaleWeight} g`);
         }
 
         this.showIngredientMessage(`Added ${weight}g of ${ingredient} to scale!`);
@@ -726,9 +726,28 @@ class CountertopScene extends Phaser.Scene {
             });
 
             scale.on('pointerdown', () => {
-                // Clear scale functionality
-                this.clearScale();
+                if (this.carriedSprite && this.carriedIngredient === 'bowl') {
+                    // Place bowl on scale
+                    if (this.bowlOnScale) {
+                        this.showIngredientMessage('Scale already has a bowl!');
+                    } else {
+                        this.bowlOnScale = this.add.image(450, 230, 'bowl');
+                        this.bowlOnScale.setDisplaySize(240, 200);
+                        this.bowlOnScale.setDepth(10);
+                        this.addToScale('bowl');
+
+                        this.carriedSprite.destroy();
+                        this.resetCarriedState();
+                        this.showIngredientMessage('Bowl placed on scale!');
+                    }
+                } else if (this.carriedSprite) {
+                    this.showIngredientMessage("Can't tare while holding an item!");
+                } else {
+                    this.tareScale();
+                }
             });
+
+
         }
     }
 
@@ -786,4 +805,13 @@ class CountertopScene extends Phaser.Scene {
         
         return instructions[equipment] || 'Use this equipment for baking! Pick up ingredients and left-click to use. Right-click to reset.';
     }
+
+    tareScale() {
+    // Set the current weight as the tare offset
+    this.tareOffset = this.scaleWeight;
+
+    this.showIngredientMessage('Scale tared!');
+    console.log(`Tare set at: ${this.tareOffset}g`);
+}
+
 }
