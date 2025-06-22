@@ -54,7 +54,7 @@ class KitchenScene extends Phaser.Scene {
         // Back button
         const backButton = this.add.text(50, 50, '< BACK', {
             fontFamily: 'VT323',
-            fontSize: '16px',
+            fontSize: '32px',
             fill: '#F5DEB3',
             stroke: '#8B4513',
             strokeThickness: 2
@@ -78,9 +78,9 @@ class KitchenScene extends Phaser.Scene {
         });
 
         // Placeholder instruction text
-        const instruction = this.add.text(450, 600, 'Click around to explore the kitchen!', {
+        const instruction = this.add.text(450, 580, 'Click around to explore the kitchen!', {
             fontFamily: 'VT323',
-            fontSize: '14px',
+            fontSize: '24px',
             fill: '#DEB887',
             stroke: '#8B4513',
             strokeThickness: 1
@@ -161,7 +161,7 @@ class KitchenScene extends Phaser.Scene {
             // Add equipment label
             const label = this.add.text(item.x, item.y - item.height/2 - 20, item.name.toUpperCase(), {
                 fontFamily: 'VT323',
-                fontSize: '10px',
+                fontSize: '20px',
                 fill: '#F5DEB3',
                 stroke: '#8B4513',
                 strokeThickness: 1
