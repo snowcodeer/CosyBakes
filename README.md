@@ -55,4 +55,20 @@ Planned or potential features:
 
 ## 📂 Folder Structure
 
-<pre> ```plaintext CosyBakes/ ├── index.html ├── main.js ├── scenes/ │ ├── BaseCountertopScene.js │ ├── RecipeSelectionScene.js │ ├── KitchenScene.js │ ├── ScaleScene.js │ ├── MicrowaveScene.js │ ├── MixerScene.js │ └── CountertopScene.js └── assets/ ├── bakes/ ├── equipment/ ├── ingredients/ ├── scenes/ └── etc... ``` </pre>
+<pre> ```plaintext CosyBakes/ 
+  ├── index.html 
+  ├── main.js 
+  ├── scenes/ 
+  │ ├── BaseCountertopScene.js 
+  │ ├── RecipeSelectionScene.js 
+  │ ├── KitchenScene.js 
+  │ ├── ScaleScene.js 
+  │ ├── MicrowaveScene.js 
+  │ ├── MixerScene.js 
+  │ └── CountertopScene.js 
+  └── assets/ 
+  ├── bakes/ 
+  ├── equipment/ 
+  ├── ingredients/ 
+  ├── scenes/ 
+  └── etc... ``` </pre>
