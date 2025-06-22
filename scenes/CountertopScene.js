@@ -22,6 +22,9 @@ class CountertopScene extends Phaser.Scene {
         this.addingInterval = null; // For continuous adding
         this.lastMessage = '';
         this.lastEggAddTime = 0;
+        this.bowlNotepadText = null;
+        this.notepadContainer = null;
+        this.hintButton = null;
 
 
         
@@ -194,6 +197,40 @@ class CountertopScene extends Phaser.Scene {
         });
 
         console.log(`Countertop scene loaded for ${this.selectedEquipment}`);
+
+        // Create Hint button
+        this.hintButton = this.add.text(100, 100, 'Show Hint', {
+            fontFamily: 'VT323',
+            fontSize: '18px',
+            fill: '#FFFFFF',
+            backgroundColor: '#8B4513',
+            padding: { x: 10, y: 5 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        // Create Notepad UI, but hidden by default
+        const notepadBg = this.add.rectangle(100, 280, 160, 300, 0xF5F5DC)
+            .setStrokeStyle(2, 0x8B4513)
+            .setOrigin(0.5);
+
+        this.bowlNotepadText = this.add.text(100, 300, 'Bowl is empty', {
+            fontFamily: 'VT323',
+            fontSize: '16px',
+            fill: '#000000',
+            align: 'left',
+            wordWrap: { width: 140 }
+        }).setOrigin(0.5);
+
+        this.notepadContainer = this.add.container(0, 0, [notepadBg, this.bowlNotepadText]);
+        this.notepadContainer.setVisible(false);
+
+        // Toggle visibility when Hint is clicked
+        this.hintButton.on('pointerdown', () => {
+            const isVisible = this.notepadContainer.visible;
+            this.notepadContainer.setVisible(!isVisible);
+            this.hintButton.setText(isVisible ? 'Show Hint' : 'Hide Hint');
+        });
+
+
     }
 
     addInventoryBar() {
@@ -528,15 +565,15 @@ class CountertopScene extends Phaser.Scene {
         if (!this.carriedIngredient || !this.bowlOnScale) return;
 
         if (this.carriedIngredient === 'egg') {
-            const eggWeight = Phaser.Math.Between(63, 73);
+            const eggWeight = 68; // Fixed weight for each egg
             this.scaleWeight += eggWeight;
             this.updateScaleDisplay();
 
             const existingIngredient = this.bowlContents.find(item => item.ingredient === 'egg');
             if (existingIngredient) {
-                existingIngredient.amount += 1;
+                existingIngredient.amount += eggWeight;
             } else {
-                this.bowlContents.push({ ingredient: 'egg', amount: 1 });
+                this.bowlContents.push({ ingredient: 'egg', amount: eggWeight });
             }
 
             this.showIngredientMessage(`+1 egg`);
@@ -553,20 +590,32 @@ class CountertopScene extends Phaser.Scene {
 
             this.showIngredientMessage(`+${amount}g ${this.carriedIngredient}`);
         }
+
+        this.updateBowlNotepad();
+
     }
 
 
 
-    displayBowlContents() {
-        console.log('=== BOWL CONTENTS ===');
-        let totalWeight = 0;
-        this.bowlContents.forEach(item => {
-            console.log(`${item.ingredient}: ${item.amount}g`);
-            totalWeight += item.amount;
-        });
-        console.log(`Total ingredients: ${totalWeight}g`);
-        console.log('====================');
-    }
+
+        displayBowlContents() {
+            console.log('=== BOWL CONTENTS ===');
+            let totalWeight = 0;
+
+            this.bowlContents.forEach(item => {
+                if (item.ingredient === 'egg') {
+                    console.log(`${item.amount} egg${item.amount > 1 ? 's' : ''}`);
+                    totalWeight += item.amount * 68; // Fixed egg weight
+                } else {
+                    console.log(`${item.ingredient}: ${item.amount}g`);
+                    totalWeight += item.amount;
+                }
+            });
+
+            console.log(`Total ingredients: ${totalWeight}g`);
+            console.log('====================');
+        }
+
 
     placeBowlOnScale(pointer) {
         if (this.bowlOnScale) {
@@ -935,4 +984,26 @@ class CountertopScene extends Phaser.Scene {
         this.showIngredientMessage('Scale tared!');
         console.log(`Tare set at: ${this.tareOffset}g, display now shows: ${this.scaleWeight - this.tareOffset}g`);
     }
+
+    updateBowlNotepad() {
+    if (!this.bowlNotepadText) return;
+
+    if (this.bowlContents.length === 0) {
+        this.bowlNotepadText.setText('Bowl is empty');
+        return;
+    }
+
+    let lines = [];
+    this.bowlContents.forEach(item => {
+        if (item.ingredient === 'egg') {
+            const eggCount = item.amount / 68; // fixed weight per egg
+            lines.push(`${eggCount} egg${eggCount > 1 ? 's' : ''}`);
+        } else {
+            lines.push(`${item.amount}g ${item.ingredient}`);
+        }
+    });
+
+    this.bowlNotepadText.setText(lines.join('\n'));
+}
+
 }
