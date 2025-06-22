@@ -1,6 +1,11 @@
-# 🍰 Baking Game – Learn & Play Without the Mess!
+# 🍰 Baking Game – Learn & Play Without the Mess! ✨
 
-This project is a **cute and educational baking game** designed to let you **simulate your favorite recipes** without making a mess in the kitchen! It's not only a fun way to explore baking steps interactively, but also a great tool for learning and **memorizing recipes**. The game is especially great for **young children** who are too small to handle real kitchen equipment — they can safely learn how to bake in a playful and visual environment.
+This project is a **cute and educational baking game** designed to let you **simulate your favorite recipes** without making a mess in the kitchen! It's a fun and interactive way to explore the steps of baking, helping you **learn and memorize recipes** through repetition and hands-on virtual play. 🧁
+
+It’s also a perfect experience for **young children** who may be too small to handle real kitchen tools — they can safely learn how to bake in a **wholesome, imaginative environment**.
+
+All of this, of course, with a **cutesy pixel art cottagecore aesthetic**! 🏡🌸  
+Think warm wooden countertops, cozy mixers, and delightful pastel ingredients — ✨all the charm, none of the cleanup!✨
 
 ---
 
