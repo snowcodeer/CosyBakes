@@ -17,7 +17,8 @@ const gameConfig = {
         KitchenScene,            // Kitchen hub
         ScaleScene,              // Scale equipment scene
         MicrowaveScene,          // Microwave equipment scene  
-        MixerScene              // Mixer equipment scene
+        MixerScene,              // Mixer equipment scene
+        OvenScene
         // Add more equipment scenes here as needed (StoveScene, OvenScene, etc.)
     ],
     

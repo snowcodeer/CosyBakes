@@ -121,6 +121,12 @@ class MicrowaveScene extends BaseCountertopScene {
             this.showIngredientMessage('Microwave door opened!');
             
         } else if (this.microwaveOpen && this.microwaveOpenImage) {
+            // Prevent closing if holding a bowl
+            if (this.carriedIngredient === 'bowl') {
+                this.showIngredientMessage("You can't close the microwave while holding the bowl!");
+                return;
+            }
+
             // Close the microwave
             console.log('Closing microwave...');
             this.microwaveOpenImage.destroy();
@@ -134,8 +140,8 @@ class MicrowaveScene extends BaseCountertopScene {
             } else {
                 this.showIngredientMessage('Microwave door closed!');
             }
-
-        } else if (!this.textures.exists('microwave-open')) {
+        }
+        else if (!this.textures.exists('microwave-open')) {
             // Handle placeholder microwave toggle
             this.microwaveOpen = !this.microwaveOpen;
             const status = this.microwaveOpen ? 'opened' : 'closed';
