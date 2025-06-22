@@ -11,8 +11,15 @@ Think warm wooden countertops, cozy mixers, and delightful pastel ingredients �
 
 ## ⚠️ Just a Demo!
 
-This is an early demo and currently includes just a **half-baked (pardon the pun!) brownie recipe**. 🍫  
+This is a demo and currently includes just a **half-baked (pardon the pun!) brownie recipe**. 🍫  
 More recipes, features, and polish are coming soon!
+
+---
+
+## 🌐 Future Plans
+
+I'm working on connecting the game to an **API** that will let you **turn *any* of your favorite recipes into a playable game — instantly!**  
+Just drop in a recipe link or upload your own, and watch it become an adorable, interactive baking adventure. ✨🍪
 
 ---
 
